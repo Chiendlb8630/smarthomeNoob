@@ -27,6 +27,10 @@ Servo myServo;
 #define BUTTON_PIN 25 
 #define servoPin 15
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> e40df3b5072cb068f6d982cd4a13bb94c071e4cf
 DHT dht(DHTPIN, DHTTYPE);
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 HTTPClient http;
@@ -35,7 +39,10 @@ int httpResponseCode;
 int sensor;
 MFRC522 rfid(SS_PIN, RST_PIN);
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> e40df3b5072cb068f6d982cd4a13bb94c071e4cf
 unsigned long lastMillis = 0;   
 const unsigned long interval = 1500;  // Khoảng thời gian giữa các lần gửi dữ liệu (ms)
 
@@ -100,11 +107,17 @@ void loop() {
       LiGHT_SWITCH();
       LiGHT_SWITCH2();
       getDoor();
+<<<<<<< HEAD
       
       lastMillis = currentMillis;  // Cập nhật thời gian cuối cùng gửi dữ liệu
     }
   }
 
+=======
+      lastMillis = currentMillis;  // Cập nhật thời gian cuối cùng gửi dữ liệu
+    }
+  }
+>>>>>>> e40df3b5072cb068f6d982cd4a13bb94c071e4cf
 }
 
 void displayMessage(String message) {
@@ -235,10 +248,16 @@ void sendFire(){
   ///******************************///
 }
 
+<<<<<<< HEAD
 
 void LiGHT_SWITCH(){
   url = String("https://") + firebaseHost + "/LIGHT/Light1.json?auth=" + apiKey;
   
+=======
+void LiGHT_SWITCH(){
+  url = String("https://") + firebaseHost + "/LIGHT/Light1.json?auth=" + apiKey;
+
+>>>>>>> e40df3b5072cb068f6d982cd4a13bb94c071e4cf
   http.begin(url);
   //***************************// request for TURN LIGHT ON/OFF  
   http.GET();
@@ -247,6 +266,10 @@ void LiGHT_SWITCH(){
     StaticJsonDocument<200> doc;
     DeserializationError error = deserializeJson(doc, data);
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> e40df3b5072cb068f6d982cd4a13bb94c071e4cf
     if (!error) {
         int ledState = doc["status"];  // Lấy giá trị từ trường "state" trong Firebase
 
@@ -262,6 +285,10 @@ void LiGHT_SWITCH(){
       }
     http.end(); 
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> e40df3b5072cb068f6d982cd4a13bb94c071e4cf
 void LiGHT_SWITCH2(){
   url = String("https://") + firebaseHost + "/LIGHT/Light2.json?auth=" + apiKey;
   
@@ -345,10 +372,14 @@ void RFID() {
   delay(1000);
 }
 
+<<<<<<< HEAD
 
 
 void getDoor() {
   
+=======
+void getDoor() {
+>>>>>>> e40df3b5072cb068f6d982cd4a13bb94c071e4cf
     url = String("https://") + firebaseHost + "/POST/Door.json?auth=" + apiKey; 
     http.begin(url);
     int httpCode = http.GET();  // Thực hiện GET request
@@ -380,9 +411,13 @@ void getDoor() {
     } else {
       Serial.println("Error on HTTP request");
     }
+<<<<<<< HEAD
 
     http.end();  // Đóng kết nối HTTP
   
+=======
+    http.end();  // Đóng kết nối HTTP
+>>>>>>> e40df3b5072cb068f6d982cd4a13bb94c071e4cf
 }
 
 
