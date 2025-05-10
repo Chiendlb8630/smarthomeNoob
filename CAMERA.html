@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAMERA An ninh</title>
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    </head>
+<style> 
+    body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f6fa;
+    color: #333;
+    margin: 0; /* Loại bỏ margin mặc định của body */
+    padding: 0;
+}
+
+.text-center {
+    text-align: center; /* Căn giữa chữ */
+    margin: 20px 0;
+    font-size: 40px; /* Tùy chỉnh kích thước chữ (tùy chọn) */
+}
+
+
+.sidebar {
+    background-color: #6c5ce7;
+    height: 100vh; /* Chiều cao 100% trang */
+    padding: 20px;
+    position: fixed; /* Sidebar luôn cố định */
+    top: 0; /* Cố định ở trên cùng */
+    left: 0; /* Cố định ở bên trái */
+    width: 80px; /* Độ rộng sidebar */
+    z-index: 1000; /* Đảm bảo sidebar nằm trên các thành phần khác */
+    transition: width 0.3s; /* Hiệu ứng chuyển đổi chiều rộng */
+}
+
+.sidebar i {
+    color: white;
+    font-size: 24px;
+    margin: 20px 0;
+    display: block;
+    text-align: center;
+}
+
+#logout-icon {
+    cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease; /* Hiệu ứng khi click */
+    color: #333; /* Màu ban đầu */
+}
+
+#logout-icon:active {
+    transform: scale(1.2); /* Phóng to khi click */
+    color: red; /* Thay đổi màu khi click */
+}
+
+#logout-icon.clicked {
+    opacity: 0.5; /* Mờ dần sau khi click */
+}
+
+
+.custom-card {
+    border-radius: 15px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    background-color: #f8f9fa;
+}
+
+.container-xxl {
+        max-width: 1200px;
+         /* Chiều rộng tối đa cho container để phù hợp với camera */
+    }
+
+    .chart-container {
+        
+        position: relative;
+        width: 100%;
+        height: 500px; /* Đặt chiều cao tự động */
+        display: flex;
+        justify-content: center; /* Căn giữa theo chiều ngang */
+        align-items: center; /* Căn giữa theo chiều dọc */
+    }
+
+    #videoStream {
+        width: 100%; /* Đặt chiều rộng 100% để khớp với container */
+        height: 100% ; /* Đặt chiều cao tự động để giữ tỷ lệ */
+        object-fit: cover; /* Đảm bảo hình ảnh giữ tỷ lệ khi thay đổi kích thước */
+        border-radius: 30px;
+        background-color: #000
+    }
+    #startButton {
+    margin-right: 10px; /* Khoảng cách bên phải của nút Start Stream */
+}
+
+
+
+</style>
+<h1 class="text-center">
+    Camera 
+</h1>
+
+
+<body>
+    <div class="sidebar">
+        <a href="Home.html">
+            <i class="fas fa-home"></i>
+        </a>
+        <i class="fas fa-camera"></i>
+
+        <a href="Home2.html">
+            <i class="	fas fa-address-car"></i>
+        </a>
+        <i class="fas fa-sign-out-alt" onclick="confirmLogout()" id="logout-icon"></i>
+    </div>
+    
+   
+
+    <div class="container-xxl mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="custom-card">
+                    <div class="chart-container">
+                        <div>
+                            <img id="videoStream" alt=""/>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center mt-3">
+            <button id="startButton" class="btn btn-dark" onclick="startStream()">Bật cam</button>
+            <button id="stopButton" class ="btn btn-dark " onclick ="stopStream()">Tắt cam</button>
+        </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    
+
+    const wsUrl = 'ws://192.168.167.243:8080';
+        let ws;
+        const videoElement = document.getElementById('videoStream');
+        const statusElement = document.getElementById('status');
+
+        // Hàm bắt đầu kết nối WebSocket khi nhấn nút
+        function startStream() {
+            ws = new WebSocket(wsUrl);
+            videoElement.style.display = 'block';
+            ws.onopen = () => {
+                console.log('WebSocket connection established');
+                statusElement.textContent = 'Connected to WebSocket server';
+                document.getElementById('startButton').style.display = 'none'; // Ẩn nút sau khi bắt đầu stream
+            };
+
+            ws.onmessage = async (event) => {
+                if (event.data instanceof Blob) {
+                    const blob = event.data;
+                    const imgURL = URL.createObjectURL(blob);
+                    videoElement.src = imgURL;
+                    videoElement.onload = () => URL.revokeObjectURL(imgURL);
+                } else if (event.data instanceof ArrayBuffer) {
+                    const blob = new Blob([event.data], { type: 'image/jpeg' });
+                    const imgURL = URL.createObjectURL(blob);
+                    videoElement.src = imgURL;
+                    videoElement.onload = () => URL.revokeObjectURL(imgURL);
+                } else {
+                    console.error("Received unsupported data format.");
+                }
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket connection closed');
+                statusElement.textContent = 'Disconnected from WebSocket server';
+                statusElement.style.color = 'red';
+                document.getElementById('startButton').style.display = 'block'; // Hiện lại nút khi ngắt kết nối
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                statusElement.textContent = 'WebSocket error occurred';
+                statusElement.style.color = 'red';
+            };
+        }
+
+        function stopStream() {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.close();  
+        const statusElement = document.getElementById('status');
+
+        videoElement.style.display = 'none';
+    }
+}
+
+    // Xác nhận đăng xuất
+    function confirmLogout() {
+        let confirmation = confirm("Bạn có chắc chắn muốn đăng xuất không?");
+        if (confirmation) {
+            window.location.href = "/DANG_NHAP.html";
+        }
+    }
+
+    </script>
+</body>
+</html>
+
+
+

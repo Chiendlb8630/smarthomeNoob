@@ -1,0 +1,955 @@
+<html>
+ <head>
+  <title>
+   Smart Home N22
+  </title>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <style>
+ body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f6fa;
+    color: #333;
+}
+
+.sidebar {
+    background-color: #6c5ce7;
+    height: 100vh;
+    padding: 20px;
+    position: fixed;
+    width: 80px;
+}
+
+.sidebar i {
+    color: white;
+    font-size: 24px;
+    margin: 20px 0;
+    display: block;
+    text-align: center;
+}
+
+.content {
+    margin-left: 100px;
+    padding: 20px;
+}
+
+
+#logout-icon {
+    cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease; /* Hiệu ứng khi click */
+    color: #333; /* Màu ban đầu */
+  }
+
+  #logout-icon:active {
+    transform: scale(1.2); /* Phóng to khi click */
+    color: red; /* Thay đổi màu khi click */
+  }
+
+  #logout-icon.clicked {
+    opacity: 0.5; /* Mờ dần sau khi click */
+  }
+
+
+.header .user-info img {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    margin-right: 20px;
+}
+
+.welcome-card {
+    background-color: #ffeaa7;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.welcome-card img {
+    width: 100px;
+}
+
+.device-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: -10px;
+}
+.table {
+  background-color: red ;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 300px;
+}
+
+.device-card .device {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.device-card .device .device-icon {
+    font-size: 24px;
+}
+
+.device-card .device .device-status {
+    display: flex;
+    align-items: center;
+}
+
+
+.custom-card {
+      border-radius: 15px; /* Bo tròn góc */
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Đổ bóng */
+      padding: 15px; /* Padding bên trong */
+      margin-top: 0px; /* Khoảng cách phía trên */
+      margin-bottom: 20px; /* Khoảng cách phía dưới */
+      background-color: #f8f9fa; /* Màu nền */
+      cursor: pointer; /* Chỉ thị con trỏ chuột khi di chuột qua card */
+      text-align: center; /* Căn giữa nội dung */
+      transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng chuyển đổi */
+    }
+
+    .custom-card:hover {
+      transform: scale(1.05); /* Phóng to 5% */
+      box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.2); /* Tăng độ đổ bóng */
+    }
+
+    .custom-card h3 {
+      font-weight: bold; /* Đậm chữ */
+      margin-bottom: 15px; /* Khoảng cách dưới tiêu đề */
+    }
+
+    .card-wrapper {
+      display: flex; /* Flexbox cho layout */
+      justify-content: space-between; /* Căn giữa các thẻ card */
+    }
+
+    .custom-card {
+      flex: 0 0 48%; /* Chiếm khoảng 48% chiều rộng */
+    }
+
+    #lockIcon {
+      font-size: 80px; /* Kích thước icon */
+      color: #007bff; /* Màu icon */
+      margin-bottom: 5px; /* Khoảng cách dưới icon */
+    }
+    
+
+    @keyframes shake {
+  0% { transform: translate(0); }
+  25% { transform: translate(-5px, 0); }
+  50% { transform: translate(5px, 0); }
+  75% { transform: translate(-5px, 0); }
+  100% { transform: translate(0); }
+}
+
+.shake {
+  animation: shake 0.5s ease; /* Thời gian hiệu ứng rung */
+}
+
+    /* Đặt kích thước cho biểu đồ */
+    canvas {
+  max-width: 100%;
+  max-height: 400px;
+  display: block; /* Đảm bảo rằng canvas là một khối */
+  margin: 0 auto; /* Căn giữa theo chiều ngang */
+}
+
+
+.form-nhap {
+      display: flex;
+      align-items: center;   /* Căn giữa theo chiều dọc */
+      margin-bottom: 10px;
+  }
+  
+
+
+  </style>
+ </head>
+ <body>
+    <div class="sidebar">
+      <i class="fas fa-home"></i>
+
+      <a href="CAMERA.html">
+        <i class="fas fa-camera"></i>
+      </a>
+      <a href="#" id="settingsLink">
+        <i class="fas fa-address-card"></i>
+    </a>
+      <i class="fas fa-sign-out-alt" onclick="confirmLogout()" id="logout-icon"></i>
+    </div>
+  
+    <div class="content">
+      <div class="welcome-card">
+        <div>
+            <h2>Hello, welcome home!</h2>
+            <p id="airQuality">Checking air quality...</p>
+            <p><i class="fas fa-thermometer-half"></i> <span id="temperature">Loading...</span>°C Outdoor temperature</p>
+            <p><i class="fas fa-cloud"></i> <span id="weatherDescription">Loading...</span></p>
+        </div>
+        <img 
+            src="https://storage.googleapis.com/a1aa/image/8GYM1BOfLiTfzEe4cf1rHUWK4Ipfn7nwR4AevhUH3ElNkj54E.jpg"
+            alt="Illustration of a person walking a dog" width="100" height="100"
+        />
+    </div>
+    
+  
+      <h3>N22's Home</h3>
+      <div class="row">
+        <div class="col-md-8">
+          <div class="row">
+      
+            
+            <div class="col-md-3">
+              <div class="device-card">
+                <div class="device">
+                  <div class="device-icon"><i class="fas fa-clock"></i></div>
+                  <div class="device-status">
+                    <span><button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">Hẹn giờ</button></span>
+                    <div class="form-check form-switch">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          
+
+            <!-- Device 2: Temperature -->
+            <div class="col-md-3">
+              <div class="device-card">
+                <div class="device">
+                  <div class="device-icon"><i class="fas fa-bolt"></i></div>
+                  <div class="device-status">
+                    <span>DEVICE3 </span>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" id="temperatureSwitch" type="checkbox" checked="" />
+                      <label class="form-check-label" for="temperatureSwitch"></label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+      
+            <!-- Device 3: Air Conditioner -->
+            <div class="col-md-3">
+              <div class="device-card">
+                <div class="device">
+                  <div class="device-icon"><i class="fas fa-lightbulb"></i></div>
+                  <div class="device-status">
+                    <span>LIGHT 2 </span>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" id="airConditionerSwitch" type="checkbox" />
+                      <label class="form-check-label" for="airConditionerSwitch"></label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+      
+            <!-- Device 4: Lights -->
+            <div class="col-md-3">
+              <div class="device-card">
+                <div class="device">
+                  <div class="device-icon"><i class="fas fa-lightbulb"></i></div>
+                  <div class="device-status">
+                    <span>LIGHT 1</span>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" id="lightsSwitch" type="checkbox" />
+                      <label class="form-check-label" for="lightsSwitch"></label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      
+        <!-- Add this as a new column in the same row -->
+        <!-- Hello Card -->
+  <!-- Hello Card with input box -->
+
+  <div class="col-md-4">
+    <div class="device-card hello-card">
+      <div class="device">
+        <div class="device-icon"><i class="fas fa-smile"></i></div>
+        <div class="device-status d-flex align-items-center"> <!-- Sử dụng d-flex và align-items-center -->
+         
+          <input type="text" id="messageInput" class="form-control me-2" placeholder="MESSAGE" /> <!-- Ô nhập liệu với Bootstrap -->
+          <button type="button" class="btn btn-primary" id="liveToastBtn">Gửi</button>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <div class="container mt-5">
+    
+    <div class="card-wrapper">
+      <div class="custom-card">
+        <h3>Nhiệt độ </h3>
+        <canvas id="pieChart1"></canvas>
+ 
+        <div id="temperatureDisplay1" style="margin-top: 10px; font-size: 24px; font-weight: bold; text-align: center;">
+          Nhiệt độ: <span id="temperatureValue1"></span> °C
+        </div>
+        
+
+      </div>
+
+      <div class="custom-card">
+        <h3>Độ ẩm</h3>
+        <canvas id="pieChart2"></canvas>
+
+        <div id="temperatureDisplay1" style="margin-top: 10px; font-size: 24px; font-weight: bold; text-align: center;">
+          Độ ẩm : <span id="temperatureValue2"></span> %
+        </div>
+
+      </div>
+    </div> <!-- card-wrapper -->
+  </div>
+
+
+  <div class="container">
+    <div class="row card-wrapper">
+      <div class="col-md-6 ">
+        <div class="custom-card" onclick="toggleLock()">
+          <h3>Trạng thái cửa</h3>
+        <h3 id="lockIcon" class="fas fa-lock"></h3>
+        <h3 id="doorStatus">Cửa đóng</h3>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="custom-card">
+            <h3>Quản lí thẻ RFID</h3>
+            
+            <!-- Thêm ô nhập liệu -->
+            <div class="input-container mb-3" style ="margin-top: 30px;">
+                <input type="text" class="form-control"  id="inputField"  placeholder="Nhập dữ liệu">
+            </div>
+            
+            <div class="button-container d-flex justify-content-center" style="margin-top: 40px;">
+              <button id="addCardButton" class="btn btn-success me-2">
+                  Thêm thẻ
+              </button>
+              <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#staticBackdrop" aria-controls="staticBackdrop">
+                  Quản lí thẻ
+              </button>
+          </div>
+        </div>
+    </div>
+  </div>
+  
+   
+  <div class="offcanvas offcanvas-start" data-bs-backdrop="static" tabindex="-1" id="staticBackdrop" aria-labelledby="staticBackdropLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="staticBackdropLabel">Sửa mã RFID</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div>
+        <div id="rfidContainer" class="rfid-list">
+          <!-- Dữ liệu RFID sẽ được hiển thị ở đây -->
+      </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <div class="device-icon"><i class="fas fa-smile"></i></div>
+        <strong class="me-auto"> HOME</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+       Đã gửi qua LCD
+      </div>
+    </div>
+  </div>
+
+
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasRightLabel">Hẹn giờ</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+     
+      <form id="timerFormLight1">
+        <div>
+          <h3>Bóng Đèn 1</h3>
+          <div class="form-nhap">
+            <label for="light1On">Thời gian bật:</label>
+            <input type="time" id="light1On" required>
+          </div>
+      
+          <div class="form-nhap">
+            <label for="light1Off">Thời gian tắt:</label>
+            <input type="time" id="light1Off" required>
+          </div>
+        </div>
+        <button type="button" class="btn btn-dark " onclick="saveschedule()">Lưu</button>
+      </form>
+      
+      <!-- Form for Light 2 -->
+      <form id="timerFormLight2">
+        <div>
+          <h3>Bóng Đèn 2</h3>
+          <div class="form-nhap">
+            <label for="light2On">Thời gian bật:</label>
+            <input type="time" id="light2On" required>
+          </div>
+      
+          <div class="form-nhap">
+            <label for="light2Off">Thời gian tắt:</label>
+            <input type="time" id="light2Off" required>
+          </div>
+        </div>
+        <button type="button" class="btn btn-dark" onclick="saveschedule2()" >Lưu</button>
+      </form>
+    </div>
+    </div>
+
+  
+  
+  
+
+
+     
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    
+    <script>
+
+    const city = 'Hanoi';
+    const apiKey = '40ec677c25d597934ccc14676a96b31b';
+    const url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+
+    // Hàm cập nhật thông điệp dựa trên nhiệt độ và điều kiện thời tiết
+    function updateAirQualityMessage(temp, description) {
+        let airQualityMessage = "";
+        
+        if (temp > 30) {
+            airQualityMessage = "Thời tiết khá nóng, mang theo nước uống nhé !!";
+        } else if (temp >= 20 && temp <= 30) {
+            airQualityMessage = "Thời tiết dễ chịu, phù hợp để đi chơi đó !!";
+        } else if (temp < 20) {
+            airQualityMessage = "Hơi lạnh, hãy mặc áo ấm khi ra ngoài nhé !!";
+        }
+
+        if (description.includes("rain")) {
+            airQualityMessage += "Trời đang mưa đó, mang áo mưa hoặc ô nhé !!";
+        
+        } else if (description.includes("sun")) {
+            airQualityMessage += "Thời tiết nắng đẹp, ra ngoài hoặc ở nhà ngủ !!";
+        }
+
+        document.getElementById("airQuality").innerText = airQualityMessage;
+    }
+
+    // Fetch dữ liệu thời tiết từ API và cập nhật thông điệp
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            const temp = data.main.temp; 
+            const description = data.weather[0].description; 
+
+            // Cập nhật nội dung HTML
+            document.getElementById('temperature').textContent = temp;
+            document.getElementById('weatherDescription').textContent = description;
+
+            // Gọi hàm để cập nhật câu chào dựa trên nhiệt độ và điều kiện thời tiết
+            updateAirQualityMessage(temp, description);
+        })
+        .catch(error => console.error('Error:', error));
+
+      function saveschedule2(){ 
+        const light2On = document.getElementById("light2On").value
+        const light2Off = document.getElementById("light2Off").value
+
+        fetch('http://localhost:3000/api/light/status1',{
+         method : 'PUT',
+         headers : {
+          'Content-Type' : 'application/json'
+         },
+
+         body : JSON.stringify({
+         onTime1 : light2On, 
+         offTime1 : light2Off
+        })
+        }) 
+        .then(response => response.json())
+        .then(data => {
+          alert(data.message);
+        })
+        .catch(error => {
+          console.error('Có lỗi xảy ra', error);
+        });
+      }
+
+  function saveschedule(){ 
+    const light1On = document.getElementById("light1On").value
+    const light1Off = document.getElementById("light1Off").value
+
+    fetch('http://localhost:3000/api/light',{
+      method : 'PUT',
+      headers : {
+        'Content-Type' : 'application/json'
+      },
+
+      body : JSON.stringify({ 
+        onTime: light1On,
+        offTime : light1Off
+      })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message); // Hiển thị thông báo khi lưu thành công
+      })
+      .catch(error => {
+        console.error('Có lỗi xảy ra:', error);
+      });
+  }
+
+const toastTrigger = document.getElementById('liveToastBtn')
+const toastLiveExample = document.getElementById('liveToast')
+
+if (toastTrigger) {
+  const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
+  toastTrigger.addEventListener('click', () => {
+    toastBootstrap.show()
+  })
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const userName = localStorage.getItem("userName") || "Guest"; 
+    document.getElementById('userName').innerText = userName; 
+});
+
+document.getElementById('airConditionerSwitch').addEventListener('change', function(event) {
+    const status1 = event.target.checked ? 1 : 0;
+    fetch('http://localhost:3000/api/light/status1', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status1: status1 }) 
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Success:', data); 
+    })
+    .catch((error) => {
+        console.error('Error:', error); // Xử lý lỗi
+    });
+});
+
+
+document.getElementById('lightsSwitch').addEventListener('change', function(event) {
+    // Xác định giá trị status dựa trên trạng thái của checkbox
+    const status = event.target.checked ? 1 : 0;
+
+    // Gửi yêu cầu PUT đến API
+    fetch('http://localhost:3000/api/light', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: status }) // Chỉ gửi số 1 hoặc 0
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Success:', data); // Xử lý thành công nếu cần
+    })
+    .catch((error) => {
+        console.error('Error:', error); // Xử lý lỗi
+    });
+});
+
+
+
+
+
+let isLocked = true;
+function toggleLock() {
+    isLocked = !isLocked; // Đảo ngược trạng thái
+    const lockIcon = document.getElementById("lockIcon");
+    const doorStatus = document.getElementById("doorStatus");
+
+    // Thêm lớp shake khi bấm vào icon
+    lockIcon.classList.add("shake");
+    setTimeout(() => {
+      lockIcon.classList.remove("shake"); // Loại bỏ lớp shake sau 0.5 giây
+    }, 500);
+
+    if (isLocked) {``             
+      lockIcon.classList.remove("fa-unlock"); // Xóa icon mở
+      lockIcon.classList.add("fa-lock"); // Thêm icon khóa
+      doorStatus.textContent = "Cửa đóng"; // Cập nhật trạng thái
+    } else {
+      lockIcon.classList.remove("fa-lock"); // Xóa icon khóa
+      lockIcon.classList.add("fa-unlock"); // Thêm icon mở
+      doorStatus.textContent = "Cửa mở"; // Cập nhật trạng thái
+    }
+
+
+    fetch(`http://localhost:3000/api/door`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: isLocked ? 1 : 0 }), 
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+
+}
+
+
+
+function confirmLogout() {
+    let confirmation = confirm("Bạn có chắc chắn muốn đăng xuất không?");
+    if (confirmation) {
+      window.location.href = "/DANG_NHAP.html";
+    }
+  }
+
+   
+let pieChart1;
+let pieChart2;
+
+const fetchData = () => {
+  fetch('http://localhost:3000/api/data')
+    .then(response => response.json())
+    .then(data => {
+      const temperature = data[" nhiet do"]; 
+      const humidity = data["Do am"]; 
+      
+      document.getElementById('temperatureValue1').innerText = temperature;
+      document.getElementById('temperatureValue2').innerText = humidity;
+
+      
+      if (pieChart1) {
+        pieChart1.data.datasets[0].data = [temperature, 100 - temperature];
+        pieChart1.update();
+      } else {
+        // Nếu biểu đồ chưa tồn tại, tạo biểu đồ mới
+        const ctx1 = document.getElementById('pieChart1').getContext('2d');
+        pieChart1 = new Chart(ctx1, {
+          type: 'doughnut',
+          data: {
+            labels: ['Nhiệt độ'],
+            datasets: [{
+              data: [temperature, 100 - temperature], 
+              backgroundColor: ['#FF6384', '#E0E0E0'],
+            }]
+          },
+          options: {
+            responsive: true,
+            rotation: -90,
+            circumference: 180,
+            cutout: '70%',
+            plugins: {
+              legend: {
+                display: false
+              },
+            }
+          }
+        });
+      }
+
+      
+      if (pieChart2) {
+        pieChart2.data.datasets[0].data = [humidity, 100 - humidity];
+        pieChart2.update();
+      } else {
+        const ctx2 = document.getElementById('pieChart2').getContext('2d');
+        pieChart2 = new Chart(ctx2, {
+          type: 'doughnut',
+          data: {
+            labels: ['Độ ẩm'],
+            datasets: [{
+              data: [humidity, 100 - humidity],
+              backgroundColor: ['#4BC0C0', '#E0E0E0'],
+            }]
+          },
+          options: {
+            responsive: true,
+            cutout: '50%',
+            plugins: {
+              legend: {
+                position: 'top',
+              },
+            }
+          }
+        });
+      }
+    })
+    .catch(error => console.error('Error:', error));
+};
+
+
+
+window.onload = function() {
+  setInterval(fetchData, 5000);
+};
+
+function fetchFire() {
+    
+    fetch('http://localhost:3000/api/data/fire')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response for Fire was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.Fire === 1) {  
+              const audio = new Audio('image/chay.mp3'); 
+              alert('Có cháy !!!');
+              audio.play();  
+              
+              setTimeout(() => {
+               audio.pause();          // Dừng âm thanh
+               audio.currentTime = 0;  // Đặt lại về thời điểm bắt đầu
+              }, 3000); // 3 giây = 3000ms
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching Fire:', error);
+        });
+}
+
+
+function fetchStatus(){
+fetch('http://localhost:3000/api/data/res')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response for status was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            
+            if (data.status === 1) {
+                alert('Có người bấm chuông');
+                const audio = new Audio('image/chuong.mp3'); 
+                audio.play();
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching status:', error);
+        });
+      }
+
+setInterval(fetchFire, 500);  
+
+let fetchInterval = null;
+document.getElementById('temperatureSwitch').addEventListener('change', function (event) {
+  if (event.target.checked) {
+    
+    fetchInterval = setInterval(fetchStatus, 500);
+  } else {
+    
+    clearInterval(fetchInterval);
+    fetchInterval = null;
+  }
+});
+
+      
+      document.getElementById('liveToastBtn').addEventListener('click', function() {
+        const message = document.getElementById('messageInput').value;
+    
+        if (message) {
+          // Gửi yêu cầu POST tới backend
+          fetch('http://localhost:3000/api/data', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ String: message }), 
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Success:', data);
+            document.getElementById('messageInput').value = ''; 
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+        } else {
+          alert('Vui lòng nhập tin nhắn!');
+        }
+      });
+
+
+    document.getElementById('addCardButton').addEventListener('click', async () => {
+    // Lấy giá trị từ input
+    const value = document.getElementById('inputField').value;
+
+    // Kiểm tra nếu giá trị input rỗng
+    if (!value) {
+        alert('Vui lòng nhập dữ liệu!');
+        return;
+    }
+
+    // Gửi yêu cầu tới API
+    try {
+        const response = await fetch('http://localhost:3000/RFID', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                value: value // Gửi giá trị cần thêm
+            })
+        });
+
+        // Kiểm tra phản hồi từ server
+        if (response.ok) {
+            const result = await response.json();
+            alert('Thêm thẻ thành công: ' + result.message);
+            fetchRFIDData(); 
+        } else {
+            const errorData = await response.json();
+            alert('Lỗi: ' + errorData.message);
+        }
+    } catch (error) {
+        console.error('Lỗi kết nối:', error);
+        alert('Lỗi kết nối API');
+    }
+});
+
+
+async function fetchRFIDData() {
+    try {
+        const response = await fetch('http://localhost:3000/RFID');
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log(data);
+            displayRFIDData(data); // Gọi hàm để hiển thị dữ liệu
+        } else {
+            const errorData = await response.json();
+            alert('Lỗi: ' + errorData.message);
+        }
+    } catch (error) {
+        console.error('Lỗi khi lấy dữ liệu:', error);
+        alert('Không thể kết nối đến API');
+    }
+}
+
+//----------------------------------------------API xóa RFID------------------------------------------------------------
+async function deleteRFID(code) {
+    try {
+        const response = await fetch(`http://localhost:3000/RFID/${code}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            alert(result.message); // Thông báo thành công
+            fetchRFIDData(); // Tải lại danh sách RFID sau khi xóa
+        } else {
+            const errorData = await response.json();
+            alert('Lỗi: ' + errorData.message);
+        }
+    } catch (error) {
+        console.error('Lỗi khi xóa RFID:', error);
+        alert('Không thể kết nối đến API');
+    }
+}
+//----------------------------------------------------------------------------------------------------------------------
+
+
+function displayRFIDData(data) {
+    const container = document.getElementById('rfidContainer');
+    container.innerHTML = ''; // Xóa dữ liệu cũ
+
+    const row = document.createElement('div');
+    row.className = 'row'; // Bootstrap row
+
+    for (const [key, value] of Object.entries(data)) {
+        const col = document.createElement('div');
+        col.className = 'col-md-4'; //
+
+        const card = document.createElement('div');
+        card.className = 'card mb-3'; // 
+
+        card.innerHTML = `
+            <div class="card-body">
+                <p class="card-text">ID thẻ: ${value}</p>
+                <button onclick="deleteRFID('${key}')" class="btn btn-danger">Xóa</button>
+            </div>
+        `;
+
+        col.appendChild(card);
+        row.appendChild(col);
+    }
+
+    container.appendChild(row); // Thêm toàn bộ row vào container
+}
+
+
+window.onload = function() {
+  fetchData();
+  fetchRFIDData();
+  setInterval(fetchData, 5000);
+};
+
+async function fetchPassword() {
+        try {
+            const response = await fetch('http://localhost:3000/api/password'); // Gọi API để lấy mật khẩu
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            return data.password; // Trả về giá trị mật khẩu
+        } catch (error) {
+            console.error("Error fetching password:", error);
+            alert("Failed to retrieve password.");
+        }
+    }
+
+    document.getElementById('settingsLink').addEventListener('click', async function(event) {
+        event.preventDefault(); 
+
+        const passwordFromFirebase = await fetchPassword(); 
+        const password = prompt("Vui lòng nhập mật khẩu");
+        // Kiểm tra mật khẩu
+        if (password === passwordFromFirebase) {
+            window.location.href = "Home2.html"; // Chuyển đến trang nếu mật khẩu đúng
+        } else {
+            alert("Mật khẩu sai, từ chối truy cập"); // Thông báo nếu mật khẩu sai
+        }
+    });
+
+    </script>
+ 
+</body>
+</html>
